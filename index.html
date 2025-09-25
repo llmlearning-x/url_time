@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL访问监控</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #333;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn.stop {
+            background-color: #dc3545;
+        }
+        .btn.stop:hover {
+            background-color: #c82333;
+        }
+        .status {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .url-report {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .url-report th, .url-report td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .url-report th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .url-report tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .status-ok {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .status-warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .log-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #log {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            background-color: #f8f9fa;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-info {
+            color: #007bff;
+        }
+        .log-warning {
+            color: #ffc107;
+        }
+        .log-error {
+            color: #dc3545;
+        }
+        .config-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .config-item {
+            margin-bottom: 10px;
+        }
+        .config-item label {
+            display: inline-block;
+            width: 200px;
+            font-weight: bold;
+        }
+        .config-item input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>URL访问监控</h1>
+        <p>实时监控URL访问状态</p>
+    </div>
+
+    <div class="controls">
+        <button id="startScheduled" class="btn">开始定时监控</button>
+        <button id="startRandom" class="btn">开始随机访问</button>
+        <button id="stop" class="btn stop">停止</button>
+        <button id="clearLog" class="btn">清空日志</button>
+    </div>
+
+    <div class="status">
+        <table class="url-report">
+            <thead>
+                <tr>
+                    <th>URL</th>
+                    <th>状态</th>
+                    <th>响应时间</th>
+                    <th>最后检查</th>
+                    <th>累计访问次数</th>
+                </tr>
+            </thead>
+            <tbody id="reportBody">
+                <!-- URL状态行将通过JavaScript动态生成 -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="config-section">
+        <h2>配置参数</h2>
+        <div class="config-item">
+            <label for="intervalMinutes">定时检查间隔 (分钟):</label>
+            <input type="number" id="intervalMinutes" value="1" min="0.1" step="0.1">
+        </div>
+        <div class="config-item">
+            <label for="totalVisits">随机访问总次数:</label>
+            <input type="number" id="totalVisits" value="10" min="1">
+        </div>
+        <div class="config-item">
+            <label for="totalTimeSeconds">随机访问总时间 (秒):</label>
+            <input type="number" id="totalTimeSeconds" value="300" min="1">
+        </div>
+        <div class="config-item">
+            <label for="minDelay">最小延迟 (秒):</label>
+            <input type="number" id="minDelay" value="1" min="0">
+        </div>
+        <div class="config-item">
+            <label for="maxDelay">最大延迟 (秒):</label>
+            <input type="number" id="maxDelay" value="5" min="0">
+        </div>
+    </div>
+
+    <div class="log-container">
+        <div class="log-header">
+            <h2>访问日志</h2>
+        </div>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // 全局变量
+        let ws = null;
+        let urls = [];
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfig();
+            connectWebSocket();
+            setupEventListeners();
+        });
+
+        // 从config.json加载配置
+        function loadConfig() {
+            fetch('/api/config')
+                .then(response => response.json())
+                .then(config => {
+                    urls = config.urls;
+                    document.getElementById('intervalMinutes').value = config.scheduled_mode.check_interval_minutes;
+                    document.getElementById('totalVisits').value = config.random_mode.total_visits;
+                    document.getElementById('totalTimeSeconds').value = config.random_mode.total_time_seconds;
+                    document.getElementById('minDelay').value = config.realistic_mode.min_delay_seconds;
+                    document.getElementById('maxDelay').value = config.realistic_mode.max_delay_seconds;
+                    createUrlCards();
+                })
+                .catch(error => {
+                    console.error('加载配置失败:', error);
+                    // 使用默认URL
+                    urls = [
+                        "https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo",
+                        "https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning"
+                    ];
+                    createUrlCards();
+                });
+        }
+
+        // 创建URL状态表格行
+        function createUrlCards() {
+            const container = document.getElementById('reportBody');
+            container.innerHTML = '';
+            
+            urls.forEach(url => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${url}</td>
+                    <td id="status-${encodeURIComponent(url)}">未知</td>
+                    <td id="time-${encodeURIComponent(url)}">-</td>
+                    <td id="lastcheck-${encodeURIComponent(url)}">-</td>
+                    <td id="access-count-${encodeURIComponent(url)}">0</td>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // 建立WebSocket连接
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+            
+            // 获取当前页面的主机，WebSocket使用8001端口
+            const host = location.hostname;
+            const wsUrl = `ws://${host}:8001/ws`;
+            
+            try {
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function(event) {
+                    console.log('WebSocket连接已建立');
+                    addToLog('INFO', 'WebSocket连接已建立');
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        updateUI(data);
+                        addToLog(data.level, data.message);
+                    } catch (e) {
+                        console.error('解析WebSocket消息失败:', e);
+                    }
+                };
+                
+                ws.onerror = function(error) {
+                    console.error('WebSocket错误:', error);
+                    addToLog('ERROR', 'WebSocket连接错误');
+                };
+                
+                ws.onclose = function(event) {
+                    console.log('WebSocket连接已关闭');
+                    addToLog('INFO', 'WebSocket连接已关闭');
+                    // 尝试重新连接
+                    setTimeout(connectWebSocket, 3000);
+                };
+            } catch (e) {
+                console.error('创建WebSocket连接失败:', e);
+                addToLog('ERROR', '创建WebSocket连接失败');
+            }
+        }
+
+        // 更新UI
+        function updateUI(data) {
+            // 更新日志
+            if (data.url) {
+                const urlKey = encodeURIComponent(data.url);
+                const statusElement = document.getElementById(`status-${urlKey}`);
+                const timeElement = document.getElementById(`time-${urlKey}`);
+                const lastCheckElement = document.getElementById(`lastcheck-${urlKey}`);
+                const accessCountElement = document.getElementById(`access-count-${urlKey}`);
+                
+                if (statusElement) {
+                    if (data.status >= 200 && data.status < 300) {
+                        statusElement.textContent = `正常 (${data.status})`;
+                        statusElement.className = 'status-ok';
+                    } else if (data.status) {
+                        statusElement.textContent = `异常 (${data.status})`;
+                        statusElement.className = 'status-error';
+                    }
+                }
+                
+                if (timeElement && data.elapsed !== undefined) {
+                    timeElement.textContent = `${data.elapsed.toFixed(3)}s`;
+                }
+                
+                if (lastCheckElement) {
+                    lastCheckElement.textContent = new Date().toLocaleTimeString();
+                }
+                
+                // 更新访问次数
+                if (accessCountElement && data.access_count !== undefined) {
+                    accessCountElement.textContent = data.access_count;
+                }
+            }
+        }
+
+        // 添加日志
+        function addToLog(level, message) {
+            const logElement = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${level.toLowerCase()}`;
+            
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${level}: ${message}`;
+            
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            document.getElementById('startScheduled').addEventListener('click', function() {
+                // 获取当前配置参数
+                const config = {
+                    scheduled_mode: {
+                        check_interval_minutes: parseFloat(document.getElementById('intervalMinutes').value)
+                    }
+                };
+                
+                fetch('/api/start/scheduled', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            addToLog('INFO', '已启动定时监控模式');
+                        } else {
+                            addToLog('ERROR', '启动定时监控模式失败');
+                        }
+                    })
+                    .catch(error => {
+                        addToLog('ERROR', '启动定时监控模式请求失败: ' + error.message);
+                    });
+            });
+
+            document.getElementById('startRandom').addEventListener('click', function() {
+                // 获取当前配置参数
+                const config = {
+                    random_mode: {
+                        total_visits: parseInt(document.getElementById('totalVisits').value),
+                        total_time_seconds: parseInt(document.getElementById('totalTimeSeconds').value)
+                    },
+                    realistic_mode: {
+                        min_delay_seconds: parseFloat(document.getElementById('minDelay').value),
+                        max_delay_seconds: parseFloat(document.getElementById('maxDelay').value)
+                    }
+                };
+                
+                fetch('/api/start/random', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            addToLog('INFO', '已启动随机访问模式');
+                        } else {
+                            addToLog('ERROR', '启动随机访问模式失败');
+                        }
+                    })
+                    .catch(error => {
+                        addToLog('ERROR', '启动随机访问模式请求失败: ' + error.message);
+                    });
+            });
+
+            document.getElementById('stop').addEventListener('click', function() {
+                fetch('/api/stop', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            addToLog('INFO', '已停止所有任务');
+                        } else {
+                            addToLog('ERROR', '停止任务失败');
+                        }
+                    })
+                    .catch(error => {
+                        addToLog('ERROR', '停止任务请求失败: ' + error.message);
+                    });
+            });
+
+            document.getElementById('clearLog').addEventListener('click', function() {
+                document.getElementById('log').innerHTML = '';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+2025-09-25 15:48:46,804 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.370s
+2025-09-25 15:48:47,155 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.349s
+2025-09-25 15:50:46,562 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.385s
+2025-09-25 15:50:46,881 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.316s
+2025-09-25 15:51:47,266 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.348s
+2025-09-25 15:51:47,614 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.344s
+2025-09-25 16:00:39,595 INFO: 开始随机访问模式
+2025-09-25 16:00:39,595 INFO: 总访问次数: 10
+2025-09-25 16:00:39,596 INFO: 总时间: 300 秒
+2025-09-25 16:00:43,980 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.363s
+2025-09-25 16:00:43,983 INFO: 已完成 1/10 次访问
+2025-09-25 16:00:44,777 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.311s
+2025-09-25 16:00:44,780 INFO: 已完成 2/10 次访问
+2025-09-25 16:01:15,769 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.387s
+2025-09-25 16:01:15,773 INFO: 已完成 3/10 次访问
+2025-09-25 16:02:10,141 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.337s
+2025-09-25 16:02:10,143 INFO: 已完成 4/10 次访问
+2025-09-25 16:03:20,439 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.305s
+2025-09-25 16:03:20,442 INFO: 已完成 5/10 次访问
+2025-09-25 16:04:16,926 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.319s
+2025-09-25 16:04:16,929 INFO: 已完成 6/10 次访问
+2025-09-25 16:04:57,244 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.370s
+2025-09-25 16:04:57,247 INFO: 已完成 7/10 次访问
+2025-09-25 16:05:05,140 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.314s
+2025-09-25 16:05:05,143 INFO: 已完成 8/10 次访问
+2025-09-25 16:05:10,559 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.359s
+2025-09-25 16:05:10,562 INFO: 已完成 9/10 次访问
+2025-09-25 16:05:35,288 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.338s
+2025-09-25 16:05:35,291 INFO: 已完成 10/10 次访问
+2025-09-25 16:05:35,291 INFO: 随机访问模式结束
+2025-09-25 16:07:30,589 INFO: 开始随机访问模式
+2025-09-25 16:07:30,590 INFO: 总访问次数: 20
+2025-09-25 16:07:30,590 INFO: 总时间: 300 秒
+2025-09-25 16:08:12,795 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.397s
+2025-09-25 16:08:16,827 INFO: 已完成 1/20 次访问
+2025-09-25 16:08:33,518 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.351s
+2025-09-25 16:08:37,349 INFO: 已完成 2/20 次访问
+2025-09-25 16:08:40,593 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.408s
+2025-09-25 16:08:41,667 INFO: 已完成 3/20 次访问
+2025-09-25 16:09:03,546 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.344s
+2025-09-25 16:09:06,310 INFO: 已完成 4/20 次访问
+2025-09-25 16:09:13,326 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.387s
+2025-09-25 16:09:14,986 INFO: 已完成 5/20 次访问
+2025-09-25 16:09:35,847 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.300s
+2025-09-25 16:09:37,304 INFO: 已完成 6/20 次访问
+2025-09-25 16:09:44,836 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.342s
+2025-09-25 16:09:49,410 INFO: 已完成 7/20 次访问
+2025-09-25 16:09:51,363 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.355s
+2025-09-25 16:09:54,680 INFO: 已完成 8/20 次访问
+2025-09-25 16:10:32,750 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.342s
+2025-09-25 16:10:34,564 INFO: 已完成 9/20 次访问
+2025-09-25 16:10:34,928 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.364s
+2025-09-25 16:10:36,911 INFO: 已完成 10/20 次访问
+2025-09-25 16:11:06,188 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.356s
+2025-09-25 16:11:10,851 INFO: 已完成 11/20 次访问
+2025-09-25 16:11:15,020 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.311s
+2025-09-25 16:11:18,992 INFO: 已完成 12/20 次访问
+2025-09-25 16:11:50,693 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.284s
+2025-09-25 16:11:52,136 INFO: 已完成 13/20 次访问
+2025-09-25 16:11:52,746 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.323s
+2025-09-25 16:11:53,808 INFO: 已完成 14/20 次访问
+2025-09-25 16:11:56,537 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.305s
+2025-09-25 16:11:59,953 INFO: 已完成 15/20 次访问
+2025-09-25 16:12:02,526 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.345s
+2025-09-25 16:12:05,223 INFO: 已完成 16/20 次访问
+2025-09-25 16:12:08,809 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.304s
+2025-09-25 16:12:10,345 INFO: 已完成 17/20 次访问
+2025-09-25 16:12:10,684 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.338s
+2025-09-25 16:12:12,488 INFO: 已完成 18/20 次访问
+2025-09-25 16:12:12,818 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.330s
+2025-09-25 16:12:14,230 INFO: 已完成 19/20 次访问
+2025-09-25 16:12:19,115 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.346s
+2025-09-25 16:12:23,935 INFO: 已完成 20/20 次访问
+2025-09-25 16:12:23,935 INFO: 随机访问模式结束
+2025-09-25 16:12:38,449 INFO: 开始随机访问模式
+2025-09-25 16:12:38,449 INFO: 总访问次数: 20
+2025-09-25 16:12:38,449 INFO: 总时间: 300 秒
+2025-09-25 16:12:41,175 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.354s
+2025-09-25 16:12:47,164 INFO: 开始随机访问模式
+2025-09-25 16:12:47,165 INFO: 总访问次数: 30
+2025-09-25 16:12:47,165 INFO: 总时间: 300 秒
+2025-09-25 16:13:04,875 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.393s
+2025-09-25 16:13:06,726 INFO: 已完成 1/30 次访问
+2025-09-25 16:13:27,259 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.329s
+2025-09-25 16:13:28,819 INFO: 已完成 2/30 次访问
+2025-09-25 16:13:42,938 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.337s
+2025-09-25 16:13:46,155 INFO: 已完成 3/30 次访问
+2025-09-25 16:13:48,152 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.312s
+2025-09-25 16:13:50,864 INFO: 已完成 4/30 次访问
+2025-09-25 16:13:51,188 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.323s
+2025-09-25 16:13:55,251 INFO: 已完成 5/30 次访问
+2025-09-25 16:13:55,582 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.331s
+2025-09-25 16:13:58,574 INFO: 已完成 6/30 次访问
+2025-09-25 16:14:28,228 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.319s
+2025-09-25 16:14:29,645 INFO: 已完成 7/30 次访问
+2025-09-25 16:14:46,527 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.361s
+2025-09-25 16:14:49,523 INFO: 已完成 8/30 次访问
+2025-09-25 16:14:56,518 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.351s
+2025-09-25 16:15:00,406 INFO: 已完成 9/30 次访问
+2025-09-25 16:15:00,794 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.366s
+2025-09-25 16:15:05,025 INFO: 已完成 10/30 次访问
+2025-09-25 16:15:05,330 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.305s
+2025-09-25 16:15:09,276 INFO: 已完成 11/30 次访问
+2025-09-25 16:15:20,684 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.318s
+2025-09-25 16:15:24,182 INFO: 已完成 12/30 次访问
+2025-09-25 16:15:25,597 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.325s
+2025-09-25 16:15:27,556 INFO: 已完成 13/30 次访问
+2025-09-25 16:15:31,502 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.347s
+2025-09-25 16:15:36,040 INFO: 已完成 14/30 次访问
+2025-09-25 16:15:36,363 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.323s
+2025-09-25 16:15:38,299 INFO: 已完成 15/30 次访问
+2025-09-25 16:15:38,639 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.340s
+2025-09-25 16:15:42,943 INFO: 已完成 16/30 次访问
+2025-09-25 16:15:46,599 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.330s
+2025-09-25 16:15:48,150 INFO: 已完成 17/30 次访问
+2025-09-25 16:15:59,443 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.310s
+2025-09-25 16:16:01,712 INFO: 已完成 18/30 次访问
+2025-09-25 16:16:11,776 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.336s
+2025-09-25 16:16:15,236 INFO: 已完成 19/30 次访问
+2025-09-25 16:16:16,928 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.315s
+2025-09-25 16:16:19,482 INFO: 已完成 20/30 次访问
+2025-09-25 16:16:33,309 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.345s
+2025-09-25 16:16:35,522 INFO: 已完成 21/30 次访问
+2025-09-25 16:16:35,867 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.345s
+2025-09-25 16:16:38,613 INFO: 已完成 22/30 次访问
+2025-09-25 16:16:38,983 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.369s
+2025-09-25 16:16:42,688 INFO: 已完成 23/30 次访问
+2025-09-25 16:16:42,983 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.294s
+2025-09-25 16:16:45,537 INFO: 已完成 24/30 次访问
+2025-09-25 16:16:48,979 INFO: [https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo] OK — status 200, time 0.372s
+2025-09-25 16:16:52,957 INFO: 已完成 25/30 次访问
+2025-09-25 16:16:54,829 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.295s
+2025-09-25 16:16:56,482 INFO: 已完成 26/30 次访问
+2025-09-25 16:17:23,926 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.311s
+2025-09-25 16:17:28,421 INFO: 已完成 27/30 次访问
+2025-09-25 16:17:31,529 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.328s
+2025-09-25 16:17:35,089 INFO: 已完成 28/30 次访问
+2025-09-25 16:17:35,410 INFO: [https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning] OK — status 200, time 0.321s
+2025-09-25 16:17:39,369 INFO: 已完成 29/30 次访问
+2025-09-25 16:17:39,672 INFO: [https://www.modelscope.cn/studios/llmlearningX/joy-caption-beta-one-chinese] OK — status 200, time 0.303s
+2025-09-25 16:17:40,898 INFO: 已完成 30/30 次访问
+2025-09-25 16:17:40,898 INFO: 随机访问模式结束
