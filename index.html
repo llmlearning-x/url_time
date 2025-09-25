@@ -268,9 +268,11 @@
             }
             
             // 获取当前页面的主机，WebSocket使用8001端口
-            const host = location.hostname;
-            const wsUrl = `ws://${host}:8001/ws`;
-            
+            // const host = location.hostname;
+            // const wsUrl = `ws://${host}:8001/ws`;
+            // 自适应 http/https，走同域 /ws（配合 Nginx 反代到 8001）
+            const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
+            const wsUrl = `${wsProtocol}://${location.host}/ws`;
             try {
                 ws = new WebSocket(wsUrl);
                 
