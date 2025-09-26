@@ -306,6 +306,7 @@
                     return;
                 }
                 
+                const port = wsPorts[portIndex];
                 const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
                 const wsUrl = `${wsProtocol}://${location.hostname}:8085/ws`;
                 
