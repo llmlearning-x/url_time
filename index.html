@@ -281,9 +281,8 @@
                 
                 const port = wsPorts[portIndex];
                 const host = location.hostname || 'localhost';
-                const wsUrl = `ws://${host}:${port}/ws`;
-                // const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
-                // const wsUrl = `${wsProtocol}://${location.host}/ws`;
+                const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
+                const wsUrl = `${wsProtocol}://${host}:${port}/ws`;
                 
                 try {
                     ws = new WebSocket(wsUrl);
