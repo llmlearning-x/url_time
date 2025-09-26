@@ -249,13 +249,14 @@
             container.innerHTML = '';
             
             urls.forEach(url => {
+                const safeUrlId = encodeURIComponent(url);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${url}</td>
-                    <td id="status-${encodeURIComponent(url)}">未知</td>
-                    <td id="time-${encodeURIComponent(url)}">-</td>
-                    <td id="lastcheck-${encodeURIComponent(url)}">-</td>
-                    <td id="access-count-${encodeURIComponent(url)}">0</td>
+                    <td title="${url}">${url.length > 50 ? url.substring(0, 47) + '...' : url}</td>
+                    <td id="status-${safeUrlId}">未知</td>
+                    <td id="time-${safeUrlId}">-</td>
+                    <td id="lastcheck-${safeUrlId}">-</td>
+                    <td id="access-count-${safeUrlId}">0</td>
                 `;
                 container.appendChild(row);
             });
@@ -471,6 +472,3 @@
                 document.getElementById('log').innerHTML = '';
             });
         }
-    </script>
-</body>
-</html>
