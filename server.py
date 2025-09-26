@@ -393,6 +393,9 @@ async def websocket_handler(websocket):
     websocket_clients.add(websocket)
     logging.info(f"新的WebSocket连接: {websocket.remote_address}")
     
+    # 启动一个任务来定期发送ping帧
+    ping_task = asyncio.create_task(send_ping(websocket))
+    
     try:
         async for message in websocket:
             # 这里可以处理来自客户端的消息
@@ -400,9 +403,27 @@ async def websocket_handler(websocket):
     except websockets.exceptions.ConnectionClosed:
         pass
     finally:
+        # 取消ping任务
+        ping_task.cancel()
+        try:
+            await ping_task
+        except asyncio.CancelledError:
+            pass
+            
         # 移除客户端
         websocket_clients.discard(websocket)
         logging.info(f"WebSocket连接已断开: {websocket.remote_address}")
+
+
+async def send_ping(websocket):
+    """定期发送ping帧以保持连接活跃"""
+    try:
+        while True:
+            await asyncio.sleep(25)  # 每25秒发送一次ping
+            await websocket.ping()
+    except Exception:
+        pass  # 忽略发送ping时的任何错误
+
 
 def run_http_server(port=8000):
     """运行HTTP服务器"""

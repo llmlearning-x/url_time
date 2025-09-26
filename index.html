@@ -270,12 +270,19 @@
             // 定义备选的WebSocket端口
             const wsPorts = [8005, 8006, 8007, 8008, 8009];
             let portIndex = 0;
+            let reconnectTimeout = null; // 用于跟踪重连定时器
             
             function tryConnect() {
+                // 清除之前的重连定时器
+                if (reconnectTimeout) {
+                    clearTimeout(reconnectTimeout);
+                    reconnectTimeout = null;
+                }
+                
                 if (portIndex >= wsPorts.length) {
                     addToLog('ERROR', '无法连接到任何WebSocket端口');
                     // 3秒后重新尝试连接
-                    setTimeout(connectWebSocket, 3000);
+                    reconnectTimeout = setTimeout(connectWebSocket, 3000);
                     return;
                 }
                 
@@ -319,9 +326,10 @@
                             console.log(`WebSocket端口 ${port} 连接失败，尝试下一个端口`);
                             portIndex++;
                             tryConnect();
+                            return; // 避免设置重连定时器
                         }
                         // 3秒后重新连接
-                        setTimeout(connectWebSocket, 3000);
+                        reconnectTimeout = setTimeout(connectWebSocket, 3000);
                     };
                 } catch (e) {
                     console.error(`创建WebSocket连接失败，端口: ${port}`, e);
