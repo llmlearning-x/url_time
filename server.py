@@ -33,6 +33,11 @@ frontend_config = {}
 # 添加全局变量用于存储访问计数
 access_counts = {}
 
+# 定义HTTP服务器的备选端口
+HTTP_PORTS = [8000, 8001, 8002, 8003, 8004]
+# 定义WebSocket服务器的备选端口
+WS_PORTS = [8005, 8006, 8007, 8008, 8009]
+
 
 class WebRequestHandler(BaseHTTPRequestHandler):
     # 设置日志记录器
@@ -418,17 +423,51 @@ async def main():
     # 保存事件循环引用
     event_loop = asyncio.get_running_loop()
     
-    # 启动HTTP服务器（在单独的线程中）
-    http_thread = threading.Thread(target=run_http_server, args=(8000,))
-    http_thread.daemon = True
-    http_thread.start()
+    # 尝试启动HTTP服务器，使用备选端口
+    http_port = None
+    http_thread = None
     
-    # 启动WebSocket服务器
-    logging.info("WebSocket服务器启动，监听端口 8001")
-    # 只绑定IPv4地址，避免与IPv6地址冲突
-    async with websockets.serve(websocket_handler, "127.0.0.1", 8001):
-        # 等待服务器完成
-        await asyncio.Future()  # 运行直到被中断
+    for port in HTTP_PORTS:
+        try:
+            # 启动HTTP服务器（在单独的线程中）
+            http_thread = threading.Thread(target=run_http_server, args=(port,))
+            http_thread.daemon = True
+            http_thread.start()
+            http_port = port
+            logging.info(f"成功在端口 {port} 上启动HTTP服务器")
+            break
+        except OSError as e:
+            if e.errno == 10048:  # 端口被占用
+                logging.warning(f"端口 {port} 已被占用，尝试下一个端口...")
+                continue
+            else:
+                raise e
+    
+    if http_port is None:
+        logging.error("无法在任何备选端口上启动HTTP服务器")
+        return
+    
+    # 尝试启动WebSocket服务器，使用备选端口
+    ws_port = None
+    for port in WS_PORTS:
+        try:
+            logging.info(f"WebSocket服务器启动，尝试监听端口 {port}")
+            # 只绑定IPv4地址，避免与IPv6地址冲突
+            async with websockets.serve(websocket_handler, "127.0.0.1", port):
+                ws_port = port
+                logging.info(f"成功在端口 {port} 上启动WebSocket服务器")
+                # 等待服务器完成
+                await asyncio.Future()
+            break
+        except OSError as e:
+            if e.errno == 10048:  # 端口被占用
+                logging.warning(f"WebSocket端口 {port} 已被占用，尝试下一个端口...")
+                continue
+            else:
+                raise e
+    
+    if ws_port is None:
+        logging.error("无法在任何备选端口上启动WebSocket服务器")
 
 
 if __name__ == "__main__":

@@ -267,43 +267,72 @@
                 ws.close();
             }
             
-            // 获取当前页面的主机，WebSocket使用8001端口
-            const host = location.hostname;
-            const wsUrl = `ws://${host}:8001/ws`;
+            // 定义备选的WebSocket端口
+            const wsPorts = [8005, 8006, 8007, 8008, 8009];
+            let portIndex = 0;
             
-            try {
-                ws = new WebSocket(wsUrl);
-                
-                ws.onopen = function(event) {
-                    console.log('WebSocket连接已建立');
-                    addToLog('INFO', 'WebSocket连接已建立');
-                };
-                
-                ws.onmessage = function(event) {
-                    try {
-                        const data = JSON.parse(event.data);
-                        updateUI(data);
-                        addToLog(data.level, data.message);
-                    } catch (e) {
-                        console.error('解析WebSocket消息失败:', e);
-                    }
-                };
-                
-                ws.onerror = function(error) {
-                    console.error('WebSocket错误:', error);
-                    addToLog('ERROR', 'WebSocket连接错误');
-                };
-                
-                ws.onclose = function(event) {
-                    console.log('WebSocket连接已关闭');
-                    addToLog('INFO', 'WebSocket连接已关闭');
-                    // 尝试重新连接
+            function tryConnect() {
+                if (portIndex >= wsPorts.length) {
+                    addToLog('ERROR', '无法连接到任何WebSocket端口');
+                    // 3秒后重新尝试连接
                     setTimeout(connectWebSocket, 3000);
-                };
-            } catch (e) {
-                console.error('创建WebSocket连接失败:', e);
-                addToLog('ERROR', '创建WebSocket连接失败');
+                    return;
+                }
+                
+                const port = wsPorts[portIndex];
+                const host = location.hostname || 'localhost';
+                const wsUrl = `ws://${host}:${port}/ws`;
+                
+                try {
+                    ws = new WebSocket(wsUrl);
+                    
+                    ws.onopen = function(event) {
+                        console.log(`WebSocket连接已建立，端口: ${port}`);
+                        addToLog('INFO', `WebSocket连接已建立，端口: ${port}`);
+                    };
+                    
+                    ws.onmessage = function(event) {
+                        try {
+                            const data = JSON.parse(event.data);
+                            updateUI(data);
+                            addToLog(data.level, data.message);
+                        } catch (e) {
+                            console.error('解析WebSocket消息失败:', e);
+                        }
+                    };
+                    
+                    ws.onerror = function(error) {
+                        console.error(`WebSocket端口 ${port} 连接错误:`, error);
+                        // 尝试下一个端口
+                        portIndex++;
+                        tryConnect();
+                    };
+                    
+                    ws.onclose = function(event) {
+                        // 如果是正常关闭，则不重新尝试其他端口
+                        if (event.wasClean) {
+                            console.log('WebSocket连接已关闭');
+                            addToLog('INFO', 'WebSocket连接已关闭');
+                        } else {
+                            // 如果是异常关闭，则尝试下一个端口
+                            console.log(`WebSocket端口 ${port} 连接失败，尝试下一个端口`);
+                            portIndex++;
+                            tryConnect();
+                        }
+                        // 3秒后重新连接
+                        setTimeout(connectWebSocket, 3000);
+                    };
+                } catch (e) {
+                    console.error(`创建WebSocket连接失败，端口: ${port}`, e);
+                    addToLog('ERROR', `创建WebSocket连接失败，端口: ${port}`);
+                    // 尝试下一个端口
+                    portIndex++;
+                    tryConnect();
+                }
             }
+            
+            // 开始尝试连接
+            tryConnect();
         }
 
         // 更新UI
