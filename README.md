@@ -34,6 +34,78 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+下面给你一套 **在 Ubuntu 用 Nginx 把 8085 转发到 127.0.0.1:8005（WebSocket）** 的完整配置步骤——按顺序执行即可。
+
+### 1) 安装并启动 Nginx
+
+```bash
+sudo apt update
+sudo apt install -y nginx
+sudo systemctl enable --now nginx
+```
+
+### 2) 写一个独立的站点配置
+
+```bash
+sudo tee /etc/nginx/sites-available/url_time.conf >/dev/null <<'EOF'
+# 处理 WebSocket 的 Upgrade 头
+map $http_upgrade $connection_upgrade {
+  default upgrade;
+  ''      close;
+}
+
+server {
+    listen 8085;
+    server_name _;
+
+    # 前端连的就是 ws://<你的IP或域名>:8085/ws
+    location /ws {
+        proxy_pass http://127.0.0.1:8005;   # 后端实际监听在 127.0.0.1:8005
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+
+        # 可选：长连接超时
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+}
+EOF
+
+# 启用该站点
+sudo ln -sf /etc/nginx/sites-available/url_time.conf /etc/nginx/sites-enabled/url_time.conf
+#（可选）如果有 default 站点且端口冲突，先禁用
+# sudo rm -f /etc/nginx/sites-enabled/default
+```
+
+### 3) 校验并加载配置
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### 4) 放通防火墙 / 云安全组
+
+```bash
+# 本机防火墙（如启用 UFW）：
+sudo ufw allow 8085/tcp
+# 云厂商安全组：放行 8085 入站（在控制台设置）
+```
+
+### 5) 快速自检
+
+```bash
+# 确认 Nginx 在 8085 监听
+ss -lntp | grep :8085
+
+# 确认后端仍在本地 8005 监听
+ss -lntp | grep :8005
+```
+---
+
+
 ## 运行服务
 
 ```bash
