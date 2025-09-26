@@ -306,10 +306,8 @@
                     return;
                 }
                 
-                const port = wsPorts[portIndex];
-                const host = '127.0.0.1';  // 使用明确的IP地址而不是localhost
                 const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
-                const wsUrl = `${wsProtocol}://${host}:${port}/`;
+                const wsUrl = `${wsProtocol}://${location.hostname}:8085/ws`;
                 
                 try {
                     ws = new WebSocket(wsUrl);
