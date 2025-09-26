@@ -474,7 +474,7 @@ async def main():
         try:
             logging.info(f"WebSocket服务器启动，尝试监听端口 {port}")
             # 只绑定IPv4地址，避免与IPv6地址冲突
-            async with websockets.serve(websocket_handler, "127.0.0.1", port):
+            async with websockets.serve(websocket_handler, "0.0.0.0", port):
                 ws_port = port
                 logging.info(f"成功在端口 {port} 上启动WebSocket服务器")
                 # 等待服务器完成
