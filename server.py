@@ -27,6 +27,13 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s: %(message)s"
 )
 
+# 添加文件日志处理器
+file_handler = logging.FileHandler("url_monitor.log", encoding="utf-8")
+file_handler.setLevel(logging.INFO)
+file_formatter = logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
+file_handler.setFormatter(file_formatter)
+logging.getLogger().addHandler(file_handler)
+
 # 存储前端传递的配置参数
 frontend_config = {}
 
@@ -430,7 +437,8 @@ def run_http_server(port=8000):
     server_address = ('', port)
     httpd = HTTPServer(server_address, WebRequestHandler)
     logging.info(f"HTTP服务器启动，监听端口 {port}")
-    logging.info(f"在浏览器中访问 http://localhost:{port}")
+    logging.info(f"在浏览器中访问 http://localhost:{port} (如果在服务器上运行，请将localhost替换为服务器IP地址)")
+    logging.info(f"WebSocket服务器将在端口 {WS_PORTS[0]}-{WS_PORTS[-1]} 范围内自动选择可用端口")
     
     try:
         httpd.serve_forever()
@@ -473,8 +481,8 @@ async def main():
     for port in WS_PORTS:
         try:
             logging.info(f"WebSocket服务器启动，尝试监听端口 {port}")
-            # 只绑定IPv4地址，避免与IPv6地址冲突
-            async with websockets.serve(websocket_handler, "0.0.0.0", port):
+            # 绑定到所有可用接口，提高服务器环境兼容性
+            async with websockets.serve(websocket_handler, "", port):
                 ws_port = port
                 logging.info(f"成功在端口 {port} 上启动WebSocket服务器")
                 # 等待服务器完成

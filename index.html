@@ -230,7 +230,7 @@
                     document.getElementById('totalTimeSeconds').value = config.random_mode.total_time_seconds;
                     document.getElementById('minDelay').value = config.realistic_mode.min_delay_seconds;
                     document.getElementById('maxDelay').value = config.realistic_mode.max_delay_seconds;
-                    createUrlCards();
+                    createUrlTable(); // 修改为使用表格布局
                 })
                 .catch(error => {
                     console.error('加载配置失败:', error);
@@ -239,12 +239,12 @@
                         "https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo",
                         "https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning"
                     ];
-                    createUrlCards();
+                    createUrlTable(); // 修改为使用表格布局
                 });
         }
 
         // 创建URL状态表格行
-        function createUrlCards() {
+        function createUrlTable() {
             const container = document.getElementById('reportBody');
             container.innerHTML = '';
             
@@ -290,7 +290,7 @@
                 const port = wsPorts[portIndex];
                 const host = location.hostname || 'localhost';
                 const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
-                const wsUrl = `${wsProtocol}://${host}:${port}/ws`;
+                const wsUrl = `${wsProtocol}://${host}:${port}/`;
                 
                 try {
                     ws = new WebSocket(wsUrl);
@@ -472,3 +472,6 @@
                 document.getElementById('log').innerHTML = '';
             });
         }
+    </script>
+</body>
+</html>
