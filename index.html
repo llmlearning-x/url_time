@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,20 +13,24 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
         }
+
         .header h1 {
             color: #333;
         }
+
         .controls {
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
+
         .btn {
             background-color: #007bff;
             color: white;
@@ -36,71 +41,78 @@
             margin-right: 10px;
             margin-bottom: 10px;
         }
+
         .btn:hover {
             background-color: #0056b3;
         }
+
         .btn.stop {
             background-color: #dc3545;
         }
+
         .btn.stop:hover {
             background-color: #c82333;
         }
+
         .status {
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
         }
-        
+
         .url-report {
             width: 100%;
             border-collapse: collapse;
         }
-        
-        .url-report th, .url-report td {
+
+        .url-report th,
+        .url-report td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .url-report th {
             background-color: #f8f9fa;
             font-weight: bold;
         }
-        
+
         .url-report tr:hover {
             background-color: #f5f5f5;
         }
-        
+
         .status-ok {
             color: #28a745;
             font-weight: bold;
         }
-        
+
         .status-error {
             color: #dc3545;
             font-weight: bold;
         }
-        
+
         .status-warning {
             color: #ffc107;
             font-weight: bold;
         }
-        
+
         .log-container {
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-top: 20px;
         }
+
         .log-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
+
         #log {
             height: 300px;
             overflow-y: auto;
@@ -110,35 +122,43 @@
             font-size: 14px;
             background-color: #f8f9fa;
         }
+
         .log-entry {
             margin: 5px 0;
             padding: 5px 0;
             border-bottom: 1px solid #eee;
         }
+
         .log-info {
             color: #007bff;
         }
+
         .log-warning {
             color: #ffc107;
         }
+
         .log-error {
             color: #dc3545;
         }
+
         .config-section {
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-top: 20px;
         }
+
         .config-item {
             margin-bottom: 10px;
         }
+
         .config-item label {
             display: inline-block;
             width: 200px;
             font-weight: bold;
         }
+
         .config-item input {
             padding: 5px;
             border: 1px solid #ddd;
@@ -146,6 +166,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>URL访问监控</h1>
@@ -212,228 +233,152 @@
         let ws = null;
         let urls = [];
         let isClosing = false; // 标记是否正在主动关闭连接
-        
+
         // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadConfig();
             connectWebSocket();
             setupEventListeners();
         });
 
-        // 从config.json加载配置
+        // 1) 加强：加载配置 + 类型守卫 + 调试日志
         function loadConfig() {
             fetch('/api/config')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
                 .then(config => {
-                    urls = config.urls;
-                    document.getElementById('intervalMinutes').value = config.scheduled_mode.check_interval_minutes;
-                    document.getElementById('totalVisits').value = config.random_mode.total_visits;
-                    document.getElementById('totalTimeSeconds').value = config.random_mode.total_time_seconds;
-                    document.getElementById('minDelay').value = config.realistic_mode.min_delay_seconds;
-                    document.getElementById('maxDelay').value = config.realistic_mode.max_delay_seconds;
-                    createUrlTable(); // 修改为使用表格布局
+                    const list = Array.isArray(config?.urls) ? config.urls : [];
+                    if (!Array.isArray(config?.urls)) {
+                        addToLog('WARNING', 'config.urls 不是数组，已当空列表处理');
+                    }
+                    urls = list;
+                    console.log('config.urls length =', urls.length);  // 调试
+                    document.getElementById('intervalMinutes').value = config?.scheduled_mode?.check_interval_minutes ?? 1;
+                    document.getElementById('totalVisits').value = config?.random_mode?.total_visits ?? 10;
+                    document.getElementById('totalTimeSeconds').value = config?.random_mode?.total_time_seconds ?? 300;
+                    document.getElementById('minDelay').value = config?.realistic_mode?.min_delay_seconds ?? 1;
+                    document.getElementById('maxDelay').value = config?.realistic_mode?.max_delay_seconds ?? 5;
+                    createUrlTable();
                 })
-                .catch(error => {
-                    console.error('加载配置失败:', error);
-                    addToLog('ERROR', '加载配置失败: ' + error.message);
-                    // 使用默认URL
+                .catch(err => {
+                    addToLog('ERROR', '加载配置失败: ' + err.message);
                     urls = [
                         "https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo",
                         "https://www.modelscope.cn/studios/llmlearningX/Wan2.2-Animate-learning"
                     ];
-                    createUrlTable(); // 修改为使用表格布局
+                    createUrlTable();
                 });
         }
 
-        // 创建URL状态表格行
+        // 2) 创建表格行（保持你的样式与结构）
         function createUrlTable() {
             const container = document.getElementById('reportBody');
+            if (!container) return;
             container.innerHTML = '';
-            
+
             urls.forEach(url => {
-                const safeUrlId = encodeURIComponent(url);
+                const id = encodeURIComponent(url);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td title="${url}">${url.length > 100 ? url.substring(0, 47) + '...' : url}</td>
-                    <td id="status-${safeUrlId}">未知</td>
-                    <td id="time-${safeUrlId}">-</td>
-                    <td id="lastcheck-${safeUrlId}">-</td>
-                    <td id="access-count-${safeUrlId}">0</td>
-                `;
+        <td title="${url}">${url.length > 100 ? url.substring(0, 47) + '…' : url}</td>
+        <td id="status-${id}">未知</td>
+        <td id="time-${id}">-</td>
+        <td id="lastcheck-${id}">-</td>
+        <td id="access-count-${id}">0</td>
+      `;
                 container.appendChild(row);
             });
         }
 
-        // 建立WebSocket连接
-        function connectWebSocket() {
-            // 如果已有连接，先关闭它
-            if (ws) {
-                // 设置关闭标记，避免触发重连
-                isClosing = true;
-                ws.close();
-            }
-            
-            // 定义备选的WebSocket端口
-            const wsPorts = [8005, 8006, 8007, 8008, 8009];
-            let portIndex = 0;
-            let reconnectTimeout = null; // 用于跟踪重连定时器
-            let isClosing = false; // 标记是否正在主动关闭连接
-            
-            function tryConnect() {
-                // 清除之前的重连定时器
-                if (reconnectTimeout) {
-                    clearTimeout(reconnectTimeout);
-                    reconnectTimeout = null;
-                }
-                
-                // 如果正在关闭，不尝试重连
-                if (isClosing) {
-                    return;
-                }
-                
-                if (portIndex >= wsPorts.length) {
-                    addToLog('ERROR', '无法连接到任何WebSocket端口');
-                    // 15秒后重新尝试连接（增加间隔时间）
-                    reconnectTimeout = setTimeout(() => {
-                        portIndex = 0; // 重置端口索引
-                        tryConnect();
-                    }, 15000);
-                    return;
-                }
-                
-                const port = wsPorts[portIndex];
-                const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
-                const wsUrl = `${wsProtocol}://${location.hostname}:8085/ws`;
-                
-                try {
-                    ws = new WebSocket(wsUrl);
-                    
-                    ws.onopen = function(event) {
-                        console.log(`WebSocket连接已建立，端口: ${port}`);
-                        addToLog('INFO', `WebSocket连接已建立，端口: ${port}`);
-                        // 重置端口索引，下次从头开始尝试
-                        portIndex = 0;
-                    };
-                    
-                    ws.onmessage = function(event) {
-                        try {
-                            const data = JSON.parse(event.data);
-                            updateUI(data);
-                            addToLog(data.level, data.message);
-                        } catch (e) {
-                            console.error('解析WebSocket消息失败:', e);
-                        }
-                    };
-                    
-                    ws.onerror = function(error) {
-                        console.error(`WebSocket端口 ${port} 连接错误:`, error);
-                        // 尝试下一个端口
-                        portIndex++;
-                        tryConnect();
-                    };
-                    
-                    ws.onclose = function(event) {
-                        // 如果是主动关闭，则不重新连接
-                        if (isClosing) {
-                            console.log('WebSocket连接已主动关闭');
-                            addToLog('INFO', 'WebSocket连接已主动关闭');
-                            return;
-                        }
-                        
-                        // 如果是正常关闭，则不重新尝试其他端口
-                        if (event.wasClean) {
-                            console.log('WebSocket连接已关闭');
-                            addToLog('INFO', 'WebSocket连接已关闭');
-                        } else {
-                            // 如果是异常关闭，则尝试下一个端口
-                            console.log(`WebSocket端口 ${port} 连接失败，尝试下一个端口`);
-                            portIndex++;
-                            tryConnect();
-                            return; // 避免设置重连定时器
-                        }
-                        // 15秒后重新连接（增加间隔时间）
-                        reconnectTimeout = setTimeout(() => {
-                            portIndex = 0; // 重置端口索引
-                            tryConnect();
-                        }, 15000);
-                    };
-                } catch (e) {
-                    console.error(`创建WebSocket连接失败，端口: ${port}`, e);
-                    addToLog('ERROR', `创建WebSocket连接失败，端口: ${port}`);
-                    // 尝试下一个端口
-                    portIndex++;
-                    tryConnect();
-                }
-            }
-            
-            // 开始尝试连接
-            tryConnect();
+        // 3) 兜底：如果没有对应行，先补行再更新
+        function ensureRow(url) {
+            const id = encodeURIComponent(url);
+            if (document.getElementById(`status-${id}`)) return; // 已有则跳过
+            const container = document.getElementById('reportBody');
+            if (!container) return;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+      <td title="${url}">${url.length > 100 ? url.substring(0, 47) + '…' : url}</td>
+      <td id="status-${id}">未知</td>
+      <td id="time-${id}">-</td>
+      <td id="lastcheck-${id}">-</td>
+      <td id="access-count-${id}">0</td>
+    `;
+            container.appendChild(row);
         }
 
-        // 更新UI
+        // 4) 更新 UI（增加 ensureRow）
         function updateUI(data) {
-            // 更新日志
-            if (data.url) {
-                const urlKey = encodeURIComponent(data.url);
-                const statusElement = document.getElementById(`status-${urlKey}`);
-                const timeElement = document.getElementById(`time-${urlKey}`);
-                const lastCheckElement = document.getElementById(`lastcheck-${urlKey}`);
-                const accessCountElement = document.getElementById(`access-count-${urlKey}`);
-                
-                if (statusElement) {
-                    if (data.status >= 200 && data.status < 300) {
-                        statusElement.textContent = `正常 (${data.status})`;
-                        statusElement.className = 'status-ok';
-                    } else if (data.status) {
-                        statusElement.textContent = `异常 (${data.status})`;
-                        statusElement.className = 'status-error';
-                    }
-                }
-                
-                if (timeElement && data.elapsed !== undefined) {
-                    timeElement.textContent = `${data.elapsed.toFixed(3)}s`;
-                }
-                
-                if (lastCheckElement) {
-                    lastCheckElement.textContent = new Date().toLocaleTimeString();
-                }
-                
-                // 更新访问次数
-                if (accessCountElement && data.access_count !== undefined) {
-                    accessCountElement.textContent = data.access_count;
+            if (!data || !data.url) return;
+            ensureRow(data.url); // 👈 关键补丁
+
+            const id = encodeURIComponent(data.url);
+            const statusEl = document.getElementById(`status-${id}`);
+            const timeEl = document.getElementById(`time-${id}`);
+            const lastEl = document.getElementById(`lastcheck-${id}`);
+            const countEl = document.getElementById(`access-count-${id}`);
+
+            if (statusEl) {
+                if (typeof data.status === 'number' && data.status >= 200 && data.status < 300) {
+                    statusEl.textContent = `正常 (${data.status})`;
+                    statusEl.className = 'status-ok';
+                } else if (typeof data.status === 'number') {
+                    statusEl.textContent = `异常 (${data.status})`;
+                    statusEl.className = 'status-error';
                 }
             }
+            if (timeEl && typeof data.elapsed === 'number') timeEl.textContent = `${data.elapsed.toFixed(3)}s`;
+            if (lastEl) lastEl.textContent = new Date().toLocaleTimeString();
+            if (countEl && typeof data.access_count === 'number') countEl.textContent = data.access_count;
         }
+
+        // 5) WebSocket：建议日志打印 URL 而非“端口号”
+        function connectWebSocket() {
+            if (ws) ws.close();
+            const host = location.hostname || 'localhost';
+            const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+            const targetPort = (host === 'localhost' || host === '127.0.0.1') ? 8005 : 8085; // 本地8005，线上8085
+            const wsUrl = `${proto}://${host}:${targetPort}/ws`;
+
+            ws = new WebSocket(wsUrl);
+            ws.onopen = () => addToLog('INFO', `WebSocket连接已建立: ${wsUrl}`);
+            ws.onerror = (e) => addToLog('ERROR', `WebSocket错误: ${wsUrl}`);
+            ws.onclose = () => { addToLog('WARNING', `WebSocket断开，3秒后重连: ${wsUrl}`); setTimeout(connectWebSocket, 3000); };
+            ws.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    updateUI(data);
+                    if (data.message) addToLog(data.level || 'INFO', data.message);
+                } catch (err) {
+                    addToLog('ERROR', '解析WebSocket消息失败: ' + err.message);
+                }
+            };
+        }
+
 
         // 添加日志
         function addToLog(level, message) {
             const logElement = document.getElementById('log');
             const entry = document.createElement('div');
             entry.className = `log-entry log-${level.toLowerCase()}`;
-            
+
             const time = new Date().toLocaleTimeString();
             entry.textContent = `[${time}] ${level}: ${message}`;
-            
+
             logElement.appendChild(entry);
             logElement.scrollTop = logElement.scrollHeight;
         }
 
         // 设置事件监听器
         function setupEventListeners() {
-            document.getElementById('startScheduled').addEventListener('click', function() {
+            document.getElementById('startScheduled').addEventListener('click', function () {
                 // 获取当前配置参数
                 const config = {
                     scheduled_mode: {
                         check_interval_minutes: parseFloat(document.getElementById('intervalMinutes').value)
                     }
                 };
-                
-                fetch('/api/start/scheduled', { 
+
+                fetch('/api/start/scheduled', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -452,7 +397,7 @@
                     });
             });
 
-            document.getElementById('startRandom').addEventListener('click', function() {
+            document.getElementById('startRandom').addEventListener('click', function () {
                 // 获取当前配置参数
                 const config = {
                     random_mode: {
@@ -464,7 +409,7 @@
                         max_delay_seconds: parseFloat(document.getElementById('maxDelay').value)
                     }
                 };
-                
+
                 fetch('/api/start/random', {
                     method: 'POST',
                     headers: {
@@ -484,13 +429,13 @@
                     });
             });
 
-            document.getElementById('stop').addEventListener('click', function() {
+            document.getElementById('stop').addEventListener('click', function () {
                 // 标记为正在关闭状态
                 if (ws) {
                     isClosing = true; // 设置关闭标记
                     ws.close();
                 }
-                
+
                 fetch('/api/stop', { method: 'POST' })
                     .then(response => {
                         if (response.ok) {
@@ -504,10 +449,11 @@
                     });
             });
 
-            document.getElementById('clearLog').addEventListener('click', function() {
+            document.getElementById('clearLog').addEventListener('click', function () {
                 document.getElementById('log').innerHTML = '';
             });
         }
     </script>
 </body>
+
 </html>
