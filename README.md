@@ -26,7 +26,11 @@ pip install --user -r requirements.txt
 对于使用虚拟环境的用户，建议创建并激活虚拟环境：
 
 ```bash
-python -m venv venv
+apt update
+apt install -y python3-venv
+# 然后创建虚拟环境
+python3 -m venv venv
+
 # Windows:
 venv\Scripts\activate
 # macOS/Linux:
@@ -111,7 +115,30 @@ ss -lntp | grep :8005
 ```bash
 python server.py
 ```
+（可选）用 systemd 跑时，改成用新的 venv 路径
+```bash
+sudo tee /etc/systemd/system/url_time.service >/dev/null <<'EOF'
+[Unit]
+Description=URL Access Monitor (url_time)
+After=network.target
 
+[Service]
+User=root
+WorkingDirectory=/root/url_time
+Environment="PATH=/root/url_time/venv/bin"
+ExecStart=/root/url_time/venv/bin/python /root/url_time/server.py
+Restart=always
+RestartSec=3
+Environment="PYTHONIOENCODING=utf-8"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now url_time
+journalctl -u url_time -f
+```
 服务启动后，会在控制台输出HTTP和WebSocket服务器的访问地址。
 
 ## 使用说明
