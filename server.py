@@ -116,6 +116,14 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     
     def start_scheduled_mode(self):
         global jobs_running
+        # 如果已经在运行，则先停止
+        if jobs_running:
+            jobs_running = False
+            # 清除所有计划任务
+            schedule.clear()
+            # 等待一小段时间确保之前的任务已停止
+            time.sleep(0.1)
+        
         jobs_running = True
         
         self.send_response(200)
@@ -130,6 +138,12 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     
     def start_random_mode(self):
         global random_mode_running
+        # 如果已经在运行，则先停止
+        if random_mode_running:
+            random_mode_running = False
+            # 等待一小段时间确保之前的任务已停止
+            time.sleep(0.1)
+        
         random_mode_running = True
         
         self.send_response(200)
@@ -154,6 +168,16 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
         self.wfile.write(b'{"status": "all modes stopped"}')
+        
+        # 通知前端任务已停止
+        logging.info("所有任务已停止")
+        self.broadcast_websocket({
+            "level": "INFO",
+            "message": "所有任务已停止",
+            "url": "",
+            "status": 0,
+            "elapsed": 0
+        })
     
     def run_scheduled_mode(self):
         global jobs_running
@@ -180,6 +204,9 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         while jobs_running:
             schedule.run_pending()
             time.sleep(1)
+        
+        # 任务结束时清除计划
+        schedule.clear()
     
     def run_random_mode(self):
         global random_mode_running
@@ -244,7 +271,8 @@ class WebRequestHandler(BaseHTTPRequestHandler):
                 logging.info(f"已完成 {i+1}/{total_visits} 次访问")
                 # 添加随机延迟
                 delay = random.uniform(min_delay, max_delay)
-                time.sleep(delay)
+                if random_mode_running:  # 再次检查任务是否仍在运行
+                    time.sleep(delay)
         
         random_mode_running = False
         logging.info("随机访问模式结束")
@@ -351,29 +379,51 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     def broadcast_websocket(self, data):
         """广播WebSocket消息"""
         global event_loop
-        if websocket_clients and event_loop:
-            message = json.dumps(data, ensure_ascii=False)
-            disconnected = set()
-            for client in list(websocket_clients):  # 使用list避免在迭代时修改集合
-                try:
-                    # 使用保存的事件循环运行协程
-                    coroutine = client.send(message)
-                    future = asyncio.run_coroutine_threadsafe(coroutine, event_loop)
-                    # 等待结果（可选，增加超时）
-                    future.result(timeout=1)
-                except Exception as e:
-                    logging.error(f"WebSocket发送消息失败: {e}")
-                    disconnected.add(client)
+        if not websocket_clients or not event_loop:
+            return
             
-            # 移除断开连接的客户端
-            for client in disconnected:
-                websocket_clients.discard(client)
-                try:
+        try:
+            message = json.dumps(data, ensure_ascii=False)
+        except (TypeError, ValueError) as e:
+            logging.error(f"WebSocket消息序列化失败: {e}")
+            return
+            
+        disconnected = set()
+        for client in list(websocket_clients):  # 使用list避免在迭代时修改集合
+            try:
+                # 使用保存的事件循环运行协程
+                coroutine = client.send(message)
+                future = asyncio.run_coroutine_threadsafe(coroutine, event_loop)
+                # 等待结果，增加超时防止阻塞
+                future.result(timeout=1)
+            except asyncio.TimeoutError:
+                logging.warning(f"WebSocket发送消息超时，关闭连接: {client.remote_address}")
+                disconnected.add(client)
+            except websockets.exceptions.ConnectionClosed:
+                logging.info(f"WebSocket连接已关闭: {client.remote_address}")
+                disconnected.add(client)
+            except RuntimeError as e:
+                if "event loop is closed" in str(e):
+                    logging.error("无法发送WebSocket消息: 事件循环已关闭")
+                else:
+                    logging.error(f"WebSocket发送消息运行时错误: {e}")
+                disconnected.add(client)
+            except Exception as e:
+                logging.error(f"WebSocket发送消息失败: {e}, 客户端: {client.remote_address}")
+                disconnected.add(client)
+        
+        # 移除断开连接的客户端
+        for client in disconnected:
+            websocket_clients.discard(client)
+            try:
+                if not client.closed:
                     coroutine = client.close()
                     future = asyncio.run_coroutine_threadsafe(coroutine, event_loop)
                     future.result(timeout=1)
-                except:
-                    pass
+            except asyncio.TimeoutError:
+                logging.warning(f"WebSocket关闭连接超时: {client.remote_address}")
+            except Exception as e:
+                logging.error(f"WebSocket关闭连接时出错: {e}")
 
     def get_content_type(self, file_path):
         ext = os.path.splitext(file_path)[1].lower()
@@ -409,6 +459,8 @@ async def websocket_handler(websocket):
             pass
     except websockets.exceptions.ConnectionClosed:
         pass
+    except Exception as e:
+        logging.error(f"WebSocket处理异常: {e}")
     finally:
         # 取消ping任务
         ping_task.cancel()
@@ -428,7 +480,13 @@ async def send_ping(websocket):
         while True:
             await asyncio.sleep(25)  # 每25秒发送一次ping
             await websocket.ping()
-    except Exception:
+            logging.debug(f"向 {websocket.remote_address} 发送ping")
+    except websockets.exceptions.ConnectionClosed:
+        # 正常断开连接，无需记录为错误
+        pass
+    except Exception as e:
+        # 其他异常可能是网络问题或协议错误，记录为调试信息
+        logging.debug(f"发送ping时出错: {e}")
         pass  # 忽略发送ping时的任何错误
 
 
@@ -481,8 +539,8 @@ async def main():
     for port in WS_PORTS:
         try:
             logging.info(f"WebSocket服务器启动，尝试监听端口 {port}")
-            # 绑定到所有可用接口，提高服务器环境兼容性
-            async with websockets.serve(websocket_handler, "", port):
+            # 绑定到127.0.0.1而不是所有接口，避免端口冲突
+            async with websockets.serve(websocket_handler, "127.0.0.1", port):
                 ws_port = port
                 logging.info(f"成功在端口 {port} 上启动WebSocket服务器")
                 # 等待服务器完成
@@ -494,6 +552,12 @@ async def main():
                 continue
             else:
                 raise e
+        except websockets.exceptions.InvalidMessage as e:
+            logging.warning(f"WebSocket端口 {port} 接收到无效消息: {e}")
+            continue
+        except Exception as e:
+            logging.error(f"WebSocket服务器在端口 {port} 上启动时发生未知错误: {e}")
+            continue
     
     if ws_port is None:
         logging.error("无法在任何备选端口上启动WebSocket服务器")

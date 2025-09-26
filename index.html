@@ -211,6 +211,7 @@
         // 全局变量
         let ws = null;
         let urls = [];
+        let isClosing = false; // 标记是否正在主动关闭连接
         
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -222,7 +223,12 @@
         // 从config.json加载配置
         function loadConfig() {
             fetch('/api/config')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(config => {
                     urls = config.urls;
                     document.getElementById('intervalMinutes').value = config.scheduled_mode.check_interval_minutes;
@@ -234,6 +240,7 @@
                 })
                 .catch(error => {
                     console.error('加载配置失败:', error);
+                    addToLog('ERROR', '加载配置失败: ' + error.message);
                     // 使用默认URL
                     urls = [
                         "https://www.modelscope.cn/studios/llmlearningX/DeepSeek-V3.1-Demo",
@@ -252,7 +259,7 @@
                 const safeUrlId = encodeURIComponent(url);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td title="${url}">${url.length > 50 ? url.substring(0, 47) + '...' : url}</td>
+                    <td title="${url}">${url.length > 100 ? url.substring(0, 47) + '...' : url}</td>
                     <td id="status-${safeUrlId}">未知</td>
                     <td id="time-${safeUrlId}">-</td>
                     <td id="lastcheck-${safeUrlId}">-</td>
@@ -264,7 +271,10 @@
 
         // 建立WebSocket连接
         function connectWebSocket() {
+            // 如果已有连接，先关闭它
             if (ws) {
+                // 设置关闭标记，避免触发重连
+                isClosing = true;
                 ws.close();
             }
             
@@ -272,6 +282,7 @@
             const wsPorts = [8005, 8006, 8007, 8008, 8009];
             let portIndex = 0;
             let reconnectTimeout = null; // 用于跟踪重连定时器
+            let isClosing = false; // 标记是否正在主动关闭连接
             
             function tryConnect() {
                 // 清除之前的重连定时器
@@ -280,15 +291,23 @@
                     reconnectTimeout = null;
                 }
                 
+                // 如果正在关闭，不尝试重连
+                if (isClosing) {
+                    return;
+                }
+                
                 if (portIndex >= wsPorts.length) {
                     addToLog('ERROR', '无法连接到任何WebSocket端口');
-                    // 3秒后重新尝试连接
-                    reconnectTimeout = setTimeout(connectWebSocket, 3000);
+                    // 15秒后重新尝试连接（增加间隔时间）
+                    reconnectTimeout = setTimeout(() => {
+                        portIndex = 0; // 重置端口索引
+                        tryConnect();
+                    }, 15000);
                     return;
                 }
                 
                 const port = wsPorts[portIndex];
-                const host = location.hostname || 'localhost';
+                const host = '127.0.0.1';  // 使用明确的IP地址而不是localhost
                 const wsProtocol = (location.protocol === 'https:') ? 'wss' : 'ws';
                 const wsUrl = `${wsProtocol}://${host}:${port}/`;
                 
@@ -298,6 +317,8 @@
                     ws.onopen = function(event) {
                         console.log(`WebSocket连接已建立，端口: ${port}`);
                         addToLog('INFO', `WebSocket连接已建立，端口: ${port}`);
+                        // 重置端口索引，下次从头开始尝试
+                        portIndex = 0;
                     };
                     
                     ws.onmessage = function(event) {
@@ -318,6 +339,13 @@
                     };
                     
                     ws.onclose = function(event) {
+                        // 如果是主动关闭，则不重新连接
+                        if (isClosing) {
+                            console.log('WebSocket连接已主动关闭');
+                            addToLog('INFO', 'WebSocket连接已主动关闭');
+                            return;
+                        }
+                        
                         // 如果是正常关闭，则不重新尝试其他端口
                         if (event.wasClean) {
                             console.log('WebSocket连接已关闭');
@@ -329,8 +357,11 @@
                             tryConnect();
                             return; // 避免设置重连定时器
                         }
-                        // 3秒后重新连接
-                        reconnectTimeout = setTimeout(connectWebSocket, 3000);
+                        // 15秒后重新连接（增加间隔时间）
+                        reconnectTimeout = setTimeout(() => {
+                            portIndex = 0; // 重置端口索引
+                            tryConnect();
+                        }, 15000);
                     };
                 } catch (e) {
                     console.error(`创建WebSocket连接失败，端口: ${port}`, e);
@@ -455,6 +486,12 @@
             });
 
             document.getElementById('stop').addEventListener('click', function() {
+                // 标记为正在关闭状态
+                if (ws) {
+                    isClosing = true; // 设置关闭标记
+                    ws.close();
+                }
+                
                 fetch('/api/stop', { method: 'POST' })
                     .then(response => {
                         if (response.ok) {

@@ -1,82 +1,92 @@
 # URL访问监控系统
 
-一个用于监控多个URL可访问性的Python应用程序。支持定时监控和随机访问模式，并提供Web界面进行配置和实时查看监控结果。
+这是一个用于监控URL访问状态的系统，支持定时检查和随机访问模式。
 
 ## 功能特点
 
-- **定时监控模式**：按设定的时间间隔循环检查URL可访问性
-- **随机访问模式**：在指定时间段内随机访问URL，模拟真实用户行为
-- **真实访问模拟**：使用随机User-Agent和请求头，添加随机延迟
-- **Web界面**：提供友好的Web界面进行配置和查看监控结果
-- **实时日志**：通过WebSocket实时推送访问日志到前端
-- **配置管理**：通过config.json文件管理所有配置参数
-
-## 技术架构
-
-- **后端**：Python + websockets + asyncio
-- **前端**：HTML + CSS + JavaScript
-- **通信**：WebSocket实时通信
-- **部署**：HTTP服务器(端口8000) + WebSocket服务器(端口8001)
+- 定时监控URL状态
+- 随机访问模式模拟真实用户行为
+- 实时WebSocket推送结果
+- 可视化监控界面
 
 ## 安装依赖
 
-首先确保已安装Python 3.7+，然后安装依赖：
+首先确保已安装Python 3.7或更高版本，然后安装项目依赖：
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 配置文件
+如果遇到权限问题，可以使用以下命令：
 
-项目使用`config.json`文件进行配置，包含以下主要配置项：
+```bash
+pip install --user -r requirements.txt
+```
 
-- `urls`: 要监控的URL列表
-- `scheduled_mode`: 定时监控模式配置
-  - `check_interval_minutes`: 检查间隔（分钟）
-- `random_mode`: 随机访问模式配置
-  - `total_visits`: 总访问次数
-  - `total_time_seconds`: 总时间（秒）
-- `realistic_mode`: 真实访问模拟配置
-  - `user_agents`: User-Agent列表
-  - `min_delay_seconds`: 最小延迟（秒）
-  - `max_delay_seconds`: 最大延迟（秒）
+对于使用虚拟环境的用户，建议创建并激活虚拟环境：
 
-## 运行项目
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+## 运行服务
 
 ```bash
 python server.py
 ```
 
-然后在浏览器中访问 http://localhost:8000
+服务启动后，会在控制台输出HTTP和WebSocket服务器的访问地址。
 
-## 使用方法
+## 使用说明
 
-1. 打开Web界面
-2. 根据需要修改配置参数：
-   - 定时检查间隔
-   - 随机访问总次数
-   - 随机访问总时间
-   - 最小延迟和最大延迟
-3. 点击相应的启动按钮开始监控：
-   - "启动定时监控"：按设定间隔循环检查
-   - "启动随机监控"：在指定时间内随机访问
-   - "停止所有监控"：停止所有监控任务
-4. 在日志区域查看实时访问结果
+1. 打开浏览器访问显示的HTTP地址（通常是 http://127.0.0.1:8000）
+2. 在界面中配置监控参数
+3. 点击"开始定时监控"或"开始随机访问"按钮启动监控任务
+4. 实时查看监控结果和日志
 
-## 项目结构
+## 配置文件
 
-```
-url_time/
-├── server.py          # 主服务器文件
-├── index.html         # 前端界面
-├── config.json        # 配置文件
-├── requirements.txt   # 依赖列表
-└── README.md          # 说明文档
-```
+config.json 文件包含以下配置项：
 
-## 注意事项
+- urls: 要监控的URL列表
+- scheduled_mode: 定时监控模式配置
+- random_mode: 随机访问模式配置
+- realistic_mode: 真实访问模拟配置
 
-- 确保端口8000和8001未被其他程序占用
-- 前端配置参数会覆盖config.json中的默认配置
-- 日志同时输出到控制台和浏览器界面
-- 支持通过Web界面动态调整配置参数
+## 网络端口
+
+- HTTP服务器默认使用端口范围：8000-8004
+- WebSocket服务器默认使用端口范围：8005-8009
+
+如果默认端口被占用，系统会自动尝试下一个可用端口。
+
+## 问题排查
+
+如果遇到连接问题，请检查：
+
+1. 确保端口没有被其他程序占用
+2. 检查防火墙设置
+3. 查看日志文件 url_monitor.log 获取详细信息
+
+## 常见问题
+
+### WebSocket连接频繁断开重连
+
+这通常是由于网络问题或端口冲突导致的。请确保：
+
+1. 没有其他程序占用WebSocket端口（8005-8009）
+2. 防火墙没有阻止相关端口的通信
+3. 客户端和服务器之间网络连接稳定
+
+### 无法加载配置
+
+如果页面没有显示URL列表，请检查：
+
+1. config.json文件是否存在且格式正确
+2. 服务器是否有权限读取config.json文件
+3. 浏览器控制台是否有相关错误信息
